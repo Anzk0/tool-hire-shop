@@ -13,68 +13,116 @@ public class Shop
         toolList = new ArrayList<Tool>();
     }
 
-    // Add a tool to the list
+    // Adds a tool to the shop
     public void storeTool(Tool tool)
     {
         toolList.add(tool);
     }
 
-    // Print all tools in the list
+    // Displays all tools currently in the shop
     public void printAllTools()
     {
-        if (toolList.isEmpty()) {
-            System.out.println("No tools stored.");
+        if (toolList.isEmpty())
+        {
+            System.out.println("The shop has no tools at the moment.");
             return;
         }
-        for (Tool tool : toolList) {
-            tool.printDetails();
+        System.out.println("=== Shop Inventory (" + toolList.size() + " items) ===");
+        for (Tool t : toolList)
+        {
+            t.printDetails();
         }
+        System.out.println("==========================================");
     }
 
-    // Read tool data from a file chosen via file dialog
+    // Opens a file dialog, reads tool data and loads it into toolList
     public void readToolData()
     {
-        // Open file dialog for user to select the file
-        FileDialog fileDialog = new FileDialog((java.awt.Frame) null, "Select Tool Data File", FileDialog.LOAD);
-        fileDialog.setDirectory(".");
-        fileDialog.setVisible(true);
+        FileDialog fd = new FileDialog((java.awt.Frame) null, "Open Tool Data File", FileDialog.LOAD);
+        fd.setDirectory(".");
+        fd.setVisible(true);
 
-        String directory = fileDialog.getDirectory();
-        String filename  = fileDialog.getFile();
+        String dir  = fd.getDirectory();
+        String file = fd.getFile();
 
-        if (filename == null) {
-            System.out.println("No file selected.");
+        if (file == null)
+        {
+            System.out.println("No file was chosen - operation cancelled.");
             return;
         }
 
-        try {
-            Scanner scanner1 = new Scanner(new File(directory + filename));
+        System.out.println("Reading from: " + file);
 
-            while (scanner1.hasNextLine()) {
-                String lineOfText = scanner1.nextLine().trim();
+        try
+        {
+            Scanner fileScanner = new Scanner(new File(dir + file));
 
-                // Skip blank lines and comments
-                if (lineOfText.isEmpty() || lineOfText.startsWith("//")) {
+            // Keeps track of what type of tool we are currently reading
+            String currentType = "";
+
+            while (fileScanner.hasNextLine())
+            {
+                String currentLine = fileScanner.nextLine().trim();
+
+                // Skip blank lines
+                if (currentLine.isEmpty())
+                {
                     continue;
                 }
 
-                // Second scanner to parse the data line
-                Scanner scanner2 = new Scanner(lineOfText);
-                scanner2.useDelimiter(",\\s*|\\s*,\\s*");
+                // Skip comment lines
+                else if (currentLine.startsWith("//"))
+                {
+                    continue;
+                }
 
-                // Create blank tool and let it read its own data (Step 3)
-                Tool tool = new Tool();
-                tool.readData(scanner2);
-                storeTool(tool);
+                // Flag line - update the current type of data
+                else if (currentLine.startsWith("["))
+                {
+                    currentType = currentLine.toLowerCase();
+                }
 
-                scanner2.close();
+                // Real data line - create the right type of tool
+                else
+                {
+                    Scanner lineScanner = new Scanner(currentLine);
+                    lineScanner.useDelimiter("\\s*,\\s*");
+
+                    if (currentType.contains("electric"))
+                    {
+                        ElectricTool et = new ElectricTool();
+                        et.readData(lineScanner);
+                        storeTool(et);
+                    }
+                    else if (currentType.contains("hand"))
+                    {
+                        HandTool ht = new HandTool();
+                        ht.readData(lineScanner);
+                        storeTool(ht);
+                    }
+                    else if (currentType.isEmpty())
+                    {
+                        // No flag seen yet - basic tool (backwards compatible with tool_data_1.txt)
+                        Tool t = new Tool();
+                        t.readData(lineScanner);
+                        storeTool(t);
+                    }
+                    else
+                    {
+                        System.out.println("Warning: did not recognise data type - " + currentType + " - line skipped.");
+                    }
+
+                    lineScanner.close();
+                }
             }
 
-            scanner1.close();
-            System.out.println("Loaded " + toolList.size() + " tools.");
+            fileScanner.close();
+            System.out.println("Done! " + toolList.size() + " tools loaded into the shop.");
 
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + filename);
+        }
+        catch (FileNotFoundException e)
+        {
+            System.out.println("Could not open file: " + file);
         }
     }
 

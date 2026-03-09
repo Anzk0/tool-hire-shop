@@ -2,24 +2,26 @@ public class Test
 {
     public static void main(String[] args)
     {
-        // --- Step 1: Create a tool and store it in the shop ---
+        // --- Step 1: Manual tool creation (keeping Part 1 tests) ---
         Shop shop = new Shop();
-        Tool t1 = new Tool("DeWalt Circular Saw", "RD6582", 250, false, 350, 345);
-        shop.storeTool(t1);
-        shop.printAllTools();
-        System.out.println();
-
-        // --- Test printDetails() directly on a single tool ---
+        Tool t1 = new Tool();
         t1.printDetails();
+        shop.storeTool(t1);
         System.out.println();
 
-        // --- Test storing a second tool ---
-        Tool t2 = new Tool("Makita Drill", "RD2001", 12, false, 149, 1800);
-        shop.storeTool(t2);
-        shop.printAllTools();
+        // --- Test ElectricTool manually ---
+        ElectricTool et = new ElectricTool();
+        System.out.println("ElectricTool (defaults):");
+        et.printDetails();
         System.out.println();
 
-        // --- Step 2/3: Read tools from file ---
+        // --- Test HandTool manually ---
+        HandTool ht = new HandTool();
+        System.out.println("HandTool (defaults):");
+        ht.printDetails();
+        System.out.println();
+
+        // --- Step 2/3: Read tools from file (tool_data_2.txt) ---
         Shop shop2 = new Shop();
         shop2.readToolData();
         System.out.println("Tools loaded from file:");
