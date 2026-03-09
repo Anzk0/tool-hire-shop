@@ -1,75 +1,85 @@
-import java.awt.FileDialog;
-import java.awt.Frame;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.awt.FileDialog;
 
-public class Shop {
+public class Shop
+{
     private ArrayList<Tool> toolList;
 
-    public Shop() {
+    public Shop()
+    {
         toolList = new ArrayList<Tool>();
     }
 
-    public void storeTool(Tool tool) {
+    // Add a tool to the list
+    public void storeTool(Tool tool)
+    {
         toolList.add(tool);
     }
 
-    public void printAllTools() {
-        if (toolList.size() == 0) {
+    // Print all tools in the list
+    public void printAllTools()
+    {
+        if (toolList.isEmpty()) {
             System.out.println("No tools stored.");
             return;
         }
-        for (Tool t : toolList) {
-            t.printDetails();
+        for (Tool tool : toolList) {
+            tool.printDetails();
         }
     }
 
-   public void readToolData() {
-    FileDialog fd = new FileDialog((Frame) null, "Select tool data file", FileDialog.LOAD);
-    fd.setVisible(true);
+    // Read tool data from a file chosen via file dialog
+    public void readToolData()
+    {
+        // Open file dialog for user to select the file
+        FileDialog fileDialog = new FileDialog((java.awt.Frame) null, "Select Tool Data File", FileDialog.LOAD);
+        fileDialog.setDirectory(".");
+        fileDialog.setVisible(true);
 
-    String fileName = fd.getFile();
-    String dirName = fd.getDirectory();
+        String directory = fileDialog.getDirectory();
+        String filename  = fileDialog.getFile();
 
-    if (fileName == null || dirName == null) {
-        System.out.println("No file selected.");
-        return;
-    }
+        if (filename == null) {
+            System.out.println("No file selected.");
+            return;
+        }
 
-    File file = new File(dirName, fileName);
-    System.out.println("Selected file: " + file.getAbsolutePath());
+        try {
+            Scanner scanner1 = new Scanner(new File(directory + filename));
 
-    Scanner fileScanner = null;
-    try {
-        fileScanner = new Scanner(file);
+            while (scanner1.hasNextLine()) {
+                String lineOfText = scanner1.nextLine().trim();
 
-        while (fileScanner.hasNextLine()) {
-            String lineOfText = fileScanner.nextLine().trim();
+                // Skip blank lines and comments
+                if (lineOfText.isEmpty() || lineOfText.startsWith("//")) {
+                    continue;
+                }
 
-            if (lineOfText.length() == 0 || lineOfText.startsWith("//")) {
-                continue;                
+                // Second scanner to parse the data line
+                Scanner scanner2 = new Scanner(lineOfText);
+                scanner2.useDelimiter(",\\s*|\\s*,\\s*");
+
+                // Create blank tool and let it read its own data (Step 3)
+                Tool tool = new Tool();
+                tool.readData(scanner2);
+                storeTool(tool);
+
+                scanner2.close();
             }
-            Scanner lineScanner = new Scanner(lineOfText);
-            lineScanner.useDelimiter("\\s*,\\s*");
 
-            Tool tool = new Tool();
-            tool.readData(lineScanner);
-            storeTool(tool);
+            scanner1.close();
+            System.out.println("Loaded " + toolList.size() + " tools.");
 
-            lineScanner.close();
-        }
-
-    } catch (FileNotFoundException e) {
-        System.out.println("File not found: " + file.getAbsolutePath());
-    } finally {
-        if (fileScanner != null) {
-            fileScanner.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + filename);
         }
     }
 
-    //after reading, call printAllTools() 
-    printAllTools();
-}
+    public ArrayList<Tool> getToolList()
+    {
+        return toolList;
+    }
 }
