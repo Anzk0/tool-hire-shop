@@ -14,19 +14,20 @@ public class HandTool extends Tool
     // Getter
     public boolean isSharpenable() { return sharpenable; }
 
-    // Overrides Tool's printDetails()
+    // Prints tool fields then adds handtool-specific fields
     @Override
     public void printDetails()
     {
         super.printDetails();
-        System.out.println("  sharpenable: " + sharpenable);
+        System.out.println("  [HandTool] Sharpenable: " + sharpenable);
     }
 
-    // Overrides Tool's readData()
+    // Reads tool fields first then reads handtool-specific fields
+    // Field order: itemName, itemCode, cost, timesBorrowed, onLoan, weight, sharpenable
     @Override
-    public void readData(Scanner scanner)
+    public void readData(Scanner sc)
     {
-        super.readData(scanner);
-        sharpenable = Boolean.parseBoolean(scanner.next().trim());
+        super.readData(sc);
+        sharpenable = Boolean.parseBoolean(sc.next().trim());
     }
 }

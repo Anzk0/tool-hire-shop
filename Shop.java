@@ -6,36 +6,38 @@ import java.awt.FileDialog;
 
 public class Shop
 {
-    private ArrayList<Tool> toolList;
+    // Holds all shop items - tools and accessories
+    private ArrayList<ShopItem> itemList;
 
     public Shop()
     {
-        toolList = new ArrayList<Tool>();
+        itemList = new ArrayList<ShopItem>();
     }
 
-    // Adds a tool to the shop
-    public void storeTool(Tool tool)
+    // Adds any ShopItem to the list
+    public void storeTool(ShopItem item)
     {
-        toolList.add(tool);
+        itemList.add(item);
     }
 
-    // Displays all tools currently in the shop
+    // Displays all items currently in the shop
     public void printAllTools()
     {
-        if (toolList.isEmpty())
+        if (itemList.isEmpty())
         {
-            System.out.println("The shop has no tools at the moment.");
+            System.out.println("The shop has no items at the moment.");
             return;
         }
-        System.out.println("=== Shop Inventory (" + toolList.size() + " items) ===");
-        for (Tool t : toolList)
+        System.out.println("=== Shop Inventory (" + itemList.size() + " items) ===");
+        for (ShopItem item : itemList)
         {
-            t.printDetails();
+            item.printDetails();
+            System.out.println();
         }
         System.out.println("==========================================");
     }
 
-    // Opens a file dialog, reads tool data and loads it into toolList
+    // Opens a file dialog, reads item data and loads it into itemList
     public void readToolData()
     {
         FileDialog fd = new FileDialog((java.awt.Frame) null, "Open Tool Data File", FileDialog.LOAD);
@@ -57,7 +59,7 @@ public class Shop
         {
             Scanner fileScanner = new Scanner(new File(dir + file));
 
-            // Keeps track of what type of tool we are currently reading
+            // Keeps track of what type of item we are currently reading
             String currentType = "";
 
             while (fileScanner.hasNextLine())
@@ -82,7 +84,7 @@ public class Shop
                     currentType = currentLine.toLowerCase();
                 }
 
-                // Real data line - create the right type of tool
+                // Real data line - create the right type of item
                 else
                 {
                     Scanner lineScanner = new Scanner(currentLine);
@@ -100,12 +102,17 @@ public class Shop
                         ht.readData(lineScanner);
                         storeTool(ht);
                     }
-                    else if (currentType.isEmpty())
+                    else if (currentType.contains("perishable"))
                     {
-                        // No flag seen yet - basic tool (backwards compatible with tool_data_1.txt)
-                        Tool t = new Tool();
-                        t.readData(lineScanner);
-                        storeTool(t);
+                        Perishable p = new Perishable();
+                        p.readData(lineScanner);
+                        storeTool(p);
+                    }
+                    else if (currentType.contains("workwear"))
+                    {
+                        Workwear w = new Workwear();
+                        w.readData(lineScanner);
+                        storeTool(w);
                     }
                     else
                     {
@@ -117,7 +124,7 @@ public class Shop
             }
 
             fileScanner.close();
-            System.out.println("Done! " + toolList.size() + " tools loaded into the shop.");
+            System.out.println("Done! " + itemList.size() + " items loaded into the shop.");
 
         }
         catch (FileNotFoundException e)
@@ -126,8 +133,8 @@ public class Shop
         }
     }
 
-    public ArrayList<Tool> getToolList()
+    public ArrayList<ShopItem> getToolList()
     {
-        return toolList;
+        return itemList;
     }
 }

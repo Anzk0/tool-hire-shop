@@ -3,35 +3,36 @@ import java.util.Scanner;
 public class ElectricTool extends Tool
 {
     private boolean rechargeable;
-    private int power;
+    private String power;  // e.g. "18V" or "1350W" so stored as String
 
     // No-arg constructor
     public ElectricTool()
     {
         super();
         rechargeable = false;
-        power        = 0;
+        power        = "unknown";
     }
 
     // Getters
     public boolean isRechargeable() { return rechargeable; }
-    public int getPower()           { return power; }
+    public String getPower()        { return power; }
 
-    // Overrides Tool's printDetails() - calls super first then adds own fields
+    // Prints tool fields then adds electric-specific fields
     @Override
     public void printDetails()
     {
         super.printDetails();
-        System.out.println("  rechargeable: " + rechargeable
-                         + "; power: "        + power);
+        System.out.println("  [Electric] Rechargeable: " + rechargeable
+                         + " | Power: "                  + power);
     }
 
-    // Overrides Tool's readData() - calls super first then reads own fields
+    // Reads tool fields first then reads electric-specific fields
+    // Field order: itemName, itemCode, cost, timesBorrowed, onLoan, weight, rechargeable, power
     @Override
-    public void readData(Scanner scanner)
+    public void readData(Scanner sc)
     {
-        super.readData(scanner);
-        rechargeable = Boolean.parseBoolean(scanner.next().trim());
-        power        = Integer.parseInt(scanner.next().trim());
+        super.readData(sc);
+        rechargeable = Boolean.parseBoolean(sc.next().trim());
+        power        = sc.next().trim();
     }
 }
