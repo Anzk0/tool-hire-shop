@@ -1,51 +1,69 @@
+import java.util.Date;
+
 public class Test
 {
     public static void main(String[] args)
     {
-        // --- Test Customer constructor with 4 params ---
-        Customer c1 = new Customer("Newton", "David", "E", "Dr");
-        System.out.println("New customer (ID should be unknown):");
-        c1.printDetails();
+        // --- Step 1: Test DateUtil ---
+        System.out.println("=== DateUtil Tests ===");
+        Date date1 = DateUtil.convertStringToDate("25-03-2023");
+        Date date2 = DateUtil.convertStringToDate("01-04-2023");
+        System.out.println("Date 1: " + DateUtil.convertDateToLongString(date1));
+        System.out.println("Date 2: " + DateUtil.convertDateToShortString(date2));
+        System.out.println("Days between: " + DateUtil.daysBetween(date1, date2));
         System.out.println();
 
-        // --- Test no-arg Customer constructor ---
-        Customer c2 = new Customer();
-        System.out.println("No-arg customer (all empty):");
-        c2.printDetails();
-        System.out.println();
-
-        // --- Test storeCustomer() generates a proper ID ---
+        // --- Step 2: Load data and make reservations ---
         Shop shop = new Shop();
-        shop.storeCustomer(c1);
-        System.out.println("After storeCustomer() - ID should now be generated:");
-        c1.printDetails();
+        shop.readToolData();      // select items_all.txt
+        shop.readCustomerData();  // select customer_data.txt
         System.out.println();
 
-        // --- Test readCustomerData() ---
-        Shop shop2 = new Shop();
-        shop2.readCustomerData();
-        shop2.printAllCustomers();
+        shop.printAllCustomers();
         System.out.println();
 
-        // --- Test writeCustomerData() ---
-        shop2.writeCustomerData();
+        // Get a valid customer and item ID to test with
+        String custID = shop.getCustomerList().get(0).getCustomerID();
+        String itemID = "RD2001";
+
+        // Make a valid reservation
+        System.out.println("=== Making Reservations ===");
+        shop.makeItemReservation(custID, itemID, "25-03-2023", 3);
         System.out.println();
 
-        // --- Test readToolData() still works ---
-        Shop shop3 = new Shop();
-        shop3.readToolData();
-        shop3.printAllTools();
+        // Try invalid reservation - bad customer ID
+        shop.makeItemReservation("INVALID", itemID, "25-03-2023", 3);
+
+        // Try invalid reservation - bad item ID
+        shop.makeItemReservation(custID, "INVALID", "25-03-2023", 3);
+
+        // Try invalid reservation - item already booked on those days
+        shop.makeItemReservation(custID, itemID, "26-03-2023", 2);
         System.out.println();
 
-        // --- Test getItem() and getCustomer() ---
-        System.out.println("Testing getItem() and getCustomer():");
-        ShopItem found = shop3.getItem("RD2001");
-        if (found != null) { found.printDetails(); }
-        else { System.out.println("Item not found."); }
+        // Print all reservations
+        shop.printItemReservations();
+        System.out.println();
+
+        // --- Step 3: Test diary ---
+        System.out.println("=== Diary Entries ===");
+        shop.printDiaryEntries("24-03-2023", "30-03-2023");
+        System.out.println();
+
+        // --- Test write and read reservation data ---
+        shop.writeItemReservationData();
+        System.out.println();
+
+        // --- Test delete reservation ---
+        System.out.println("=== Delete Reservation ===");
+        shop.deleteItemReservation("000001");
+        shop.printItemReservations();
+        System.out.println();
 
         // --- Empty shop edge case ---
         Shop emptyShop = new Shop();
         emptyShop.printAllTools();
         emptyShop.printAllCustomers();
+        emptyShop.printItemReservations();
     }
 }
